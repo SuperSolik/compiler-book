@@ -1,6 +1,8 @@
 package lexer
 
-import "supersolik/monkey/token"
+import (
+	"supersolik/monkey/token"
+)
 
 type Lexer struct {
 	input   string
@@ -31,6 +33,9 @@ func NewToken(tokenType token.TokenType, ch byte) token.Token {
 
 func (l *Lexer) NextToken() token.Token {
 	var tok token.Token
+
+	l.skipWhitespace()
+
 	switch l.ch {
 	case '=':
 		tok = NewToken(token.ASSIGN, l.ch)
@@ -51,8 +56,50 @@ func (l *Lexer) NextToken() token.Token {
 	case 0:
 		tok.Type = token.EOF
 		tok.Literal = ""
+	default:
+		if isLetter(l.ch) {
+			tok.Literal = l.readIdent()
+			tok.Type = token.LookupIdent(tok.Literal)
+			return tok
+		} else if isDigit(l.ch) {
+			tok.Literal = l.readNumber()
+			tok.Type = token.INT
+			return tok
+		}
+		tok = NewToken(token.ILLEGAL, l.ch)
 	}
 
 	l.ReadChar()
 	return tok
+}
+
+func (l *Lexer) readIdent() string {
+	pos := l.pos
+	for isLetter(l.ch) {
+		l.ReadChar()
+	}
+
+	return l.input[pos:l.pos]
+}
+
+func isDigit(ch byte) bool {
+	return '0' <= ch && ch <= '9'
+}
+func (l *Lexer) readNumber() string {
+	pos := l.pos
+	for isDigit(l.ch) {
+		l.ReadChar()
+	}
+
+	return l.input[pos:l.pos]
+}
+
+func isLetter(ch byte) bool {
+	return 'a' <= ch && ch <= 'z' || 'A' <= ch && ch <= 'Z' || ch == '_'
+}
+
+func (l *Lexer) skipWhitespace() {
+	for l.ch == ' ' || l.ch == '\t' || l.ch == '\n' || l.ch == '\r' {
+		l.ReadChar()
+	}
 }

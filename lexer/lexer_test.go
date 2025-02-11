@@ -6,17 +6,55 @@ import (
 )
 
 func TestNextToken(t *testing.T) {
-	input := "=+(){};"
+	input := `
+	let five = 5;
+let ten = 10;
+
+let add = fn(x, y) {
+    x + y;
+};
+
+let result = add(five, ten);
+	`
 
 	expectedTokens := []token.Token{
+		{Type: token.LET, Literal: "let"},
+		{Type: token.IDENT, Literal: "five"},
 		{Type: token.ASSIGN, Literal: "="},
-		{token.PLUS, "+"},
-		{token.LPAREN, "("},
-		{token.RPAREN, ")"},
-		{token.LBRACE, "{"},
-		{token.RBRACE, "}"},
-		{token.SEMICOLON, ";"},
-		{token.EOF, ""},
+		{Type: token.INT, Literal: "5"},
+		{Type: token.SEMICOLON, Literal: ";"},
+		{Type: token.LET, Literal: "let"},
+		{Type: token.IDENT, Literal: "ten"},
+		{Type: token.ASSIGN, Literal: "="},
+		{Type: token.INT, Literal: "10"},
+		{Type: token.SEMICOLON, Literal: ";"},
+		{Type: token.LET, Literal: "let"},
+		{Type: token.IDENT, Literal: "add"},
+		{Type: token.ASSIGN, Literal: "="},
+		{Type: token.FUNCTION, Literal: "fn"},
+		{Type: token.LPAREN, Literal: "("},
+		{Type: token.IDENT, Literal: "x"},
+		{Type: token.COMMA, Literal: ","},
+		{Type: token.IDENT, Literal: "y"},
+		{Type: token.RPAREN, Literal: ")"},
+		{Type: token.LBRACE, Literal: "{"},
+		{Type: token.IDENT, Literal: "x"},
+		{Type: token.PLUS, Literal: "+"},
+		{Type: token.IDENT, Literal: "y"},
+		{Type: token.SEMICOLON, Literal: ";"},
+		{Type: token.RBRACE, Literal: "}"},
+		{Type: token.SEMICOLON, Literal: ";"},
+		{Type: token.LET, Literal: "let"},
+		{Type: token.IDENT, Literal: "result"},
+		{Type: token.ASSIGN, Literal: "="},
+		{Type: token.IDENT, Literal: "add"},
+		{Type: token.LPAREN, Literal: "("},
+		{Type: token.IDENT, Literal: "five"},
+		{Type: token.COMMA, Literal: ","},
+		{Type: token.IDENT, Literal: "ten"},
+		{Type: token.RPAREN, Literal: ")"},
+		{Type: token.SEMICOLON, Literal: ";"},
+		{Type: token.EOF, Literal: ""},
 	}
 
 	l := New(input)
