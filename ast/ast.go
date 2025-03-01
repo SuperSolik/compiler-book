@@ -2,6 +2,7 @@ package ast
 
 import (
 	"bytes"
+	"strings"
 	"supersolik/monkey/token"
 )
 
@@ -223,5 +224,52 @@ func (bs *BlockStatement) String() string {
 
 	// TODO: not sure if we need to write } for now
 	out.WriteString("}")
+	return out.String()
+}
+
+type FunctionLiteral struct {
+	Token      token.Token
+	Parameters []*Identifier
+	Body       *BlockStatement
+}
+
+func (fl *FunctionLiteral) expressionNode()      {}
+func (fl *FunctionLiteral) TokenLiteral() string { return fl.Token.Literal }
+func (fl *FunctionLiteral) String() string {
+	var out bytes.Buffer
+
+	parameters := []string{}
+
+	for _, p := range fl.Parameters {
+		parameters = append(parameters, p.String())
+	}
+
+	out.WriteString(fl.TokenLiteral())
+	out.WriteString("(" + strings.Join(parameters, ", ") + ") ")
+	out.WriteString(fl.Body.String())
+
+	return out.String()
+}
+
+type CallExpression struct {
+	Token     token.Token // NOTE: the '(' token
+	Function  Expression  // NOTE: Identifier or FunctionLiteral
+	Arguments []Expression
+}
+
+func (ce *CallExpression) expressionNode()      {}
+func (ce *CallExpression) TokenLiteral() string { return ce.Token.Literal }
+func (ce *CallExpression) String() string {
+	var out bytes.Buffer
+
+	args := []string{}
+
+	for _, a := range ce.Arguments {
+		args = append(args, a.String())
+	}
+
+	out.WriteString(ce.Function.String())
+	out.WriteString("(" + strings.Join(args, ", ") + ")")
+
 	return out.String()
 }
