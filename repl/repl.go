@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"io"
+	"supersolik/monkey/eval"
 	"supersolik/monkey/lexer"
 	"supersolik/monkey/parser"
 )
@@ -29,7 +30,10 @@ func Start(in io.Reader, out io.Writer) {
 			continue
 		}
 
-		io.WriteString(out, program.String()+"\n")
+		if evaluated := eval.Eval(program); evaluated != nil {
+			io.WriteString(out, evaluated.Inspect()+"\n")
+		}
+
 	}
 }
 
