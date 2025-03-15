@@ -60,6 +60,25 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 		return evalIdentifier(node, env)
 	case *ast.IfExpression:
 		return evalIfExpression(node, env)
+	case *ast.FunctionLiteral:
+		return &object.Function{Parameters: node.Parameters, Body: node.Body, Env: env}
+	case *ast.CallExpression:
+		// NOTE: function is *object.Function here
+		// because CallExpession either starts with :
+		//   1. the function literal itself
+		//   OR
+		//   2. an identifier that resolves to function literal
+		function := Eval(node.Function, env)
+		if isError(function) {
+			return function
+		}
+		args := evalExpressions(node.Arguments, env)
+		if len(args) == 1 && isError(args[0]) {
+			// NOTE: the error will be stored in first arg if present
+			return args[0]
+		}
+
+		return callFunction(function, args)
 	case *ast.IntegerLiteral:
 		return &object.Integer{Value: node.Value}
 	case *ast.Boolean:
@@ -216,4 +235,47 @@ func evalIdentifier(node *ast.Identifier, env *object.Environment) object.Object
 		return newError(fmt.Sprintf("identifier not found: %s", node.Value))
 	}
 	return val
+}
+
+func evalExpressions(expressions []ast.Expression, env *object.Environment) []object.Object {
+	var result []object.Object
+
+	// NOTE: eval arguments left-to-right
+	for _, e := range expressions {
+		obj := Eval(e, env)
+		if isError(obj) {
+			// NOTE: if error, return immedidately
+			return []object.Object{obj}
+		}
+		result = append(result, obj)
+	}
+
+	return result
+}
+
+func callFunction(obj object.Object, args []object.Object) object.Object {
+	function, ok := obj.(*object.Function)
+	if !ok {
+		return newError("object is not a function: %s", obj.Type())
+	}
+
+	// NOTE: create function scope
+	funcEnv := object.NewEnvironment(function.Env)
+
+	// TODO: add error if the args mismatch the params length
+	// NOTE: bind/assign the args to parameters in the scope
+	for i, param := range function.Parameters {
+		funcEnv.Set(param.Value, args[i])
+	}
+
+	result := Eval(function.Body, funcEnv)
+	return unwrapReturnValue(result)
+}
+
+func unwrapReturnValue(obj object.Object) object.Object {
+	if returnValue, ok := obj.(*object.ReturnValue); ok {
+		return returnValue.Value
+	}
+
+	return obj
 }

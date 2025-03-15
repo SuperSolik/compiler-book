@@ -215,15 +215,10 @@ func (bs *BlockStatement) TokenLiteral() string {
 func (bs *BlockStatement) String() string {
 	var out bytes.Buffer
 
-	// TODO: not sure if we need to write { for now
-	out.WriteString("{")
-
 	for _, stmt := range bs.Statements {
 		out.WriteString(stmt.String())
 	}
 
-	// TODO: not sure if we need to write } for now
-	out.WriteString("}")
 	return out.String()
 }
 
@@ -246,7 +241,7 @@ func (fl *FunctionLiteral) String() string {
 
 	out.WriteString(fl.TokenLiteral())
 	out.WriteString("(" + strings.Join(parameters, ", ") + ") ")
-	out.WriteString(fl.Body.String())
+	out.WriteString("{" + fl.Body.String() + "}")
 
 	return out.String()
 }
