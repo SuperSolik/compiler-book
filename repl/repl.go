@@ -6,6 +6,7 @@ import (
 	"io"
 	"supersolik/monkey/eval"
 	"supersolik/monkey/lexer"
+	"supersolik/monkey/object"
 	"supersolik/monkey/parser"
 )
 
@@ -13,6 +14,7 @@ const PROMT = "|> "
 
 func Start(in io.Reader, out io.Writer) {
 	scanner := bufio.NewScanner(in)
+	env := object.NewEnvironment()
 
 	for {
 		fmt.Fprintf(out, PROMT)
@@ -30,7 +32,7 @@ func Start(in io.Reader, out io.Writer) {
 			continue
 		}
 
-		if evaluated := eval.Eval(program); evaluated != nil {
+		if evaluated := eval.Eval(program, env); evaluated != nil {
 			io.WriteString(out, evaluated.Inspect()+"\n")
 		}
 
