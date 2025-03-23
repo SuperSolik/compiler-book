@@ -28,6 +28,7 @@ if (5 < 10) {
 	10 != 9;
 	"foobar"
 	"foo bar"
+	[1, 2];
 	`
 
 	expectedTokens := []token.Token{
@@ -104,6 +105,12 @@ if (5 < 10) {
 		{Type: token.SEMICOLON, Literal: ";"},
 		{Type: token.STRING, Literal: "foobar"},
 		{Type: token.STRING, Literal: "foo bar"},
+		{Type: token.LBRACKET, Literal: "["},
+		{Type: token.INT, Literal: "1"},
+		{Type: token.COMMA, Literal: ","},
+		{Type: token.INT, Literal: "2"},
+		{Type: token.RBRACKET, Literal: "]"},
+		{Type: token.SEMICOLON, Literal: ";"},
 		{Type: token.EOF, Literal: ""},
 	}
 
