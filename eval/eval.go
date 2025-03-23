@@ -79,6 +79,13 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 		}
 
 		return callFunction(function, args)
+	case *ast.ArrayLiteral:
+		elements := evalExpressions(node.Elements, env)
+		if len(elements) == 1 && isError(elements[0]) {
+			// NOTE: the error will be stored in first arg if present
+			return elements[0]
+		}
+		return &object.Array{Elements: elements}
 	case *ast.IntegerLiteral:
 		return &object.Integer{Value: node.Value}
 	case *ast.Boolean:
