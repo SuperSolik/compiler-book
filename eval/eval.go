@@ -245,11 +245,15 @@ func isTruthy(obj object.Object) bool {
 }
 
 func evalIdentifier(node *ast.Identifier, env *object.Environment) object.Object {
-	val, ok := env.Get(node.Value)
-	if !ok {
-		return newError(fmt.Sprintf("identifier not found: %s", node.Value))
+	if val, ok := env.Get(node.Value); ok {
+		return val
 	}
-	return val
+
+	if builtin, ok := builtins[node.Value]; ok {
+		return builtin
+	}
+
+	return newError(fmt.Sprintf("identifier not found: %s", node.Value))
 }
 
 func evalExpressions(expressions []ast.Expression, env *object.Environment) []object.Object {
@@ -269,22 +273,24 @@ func evalExpressions(expressions []ast.Expression, env *object.Environment) []ob
 }
 
 func callFunction(obj object.Object, args []object.Object) object.Object {
-	function, ok := obj.(*object.Function)
-	if !ok {
+	switch fn := obj.(type) {
+	case *object.Function:
+		// NOTE: create function scope
+		funcEnv := object.NewEnvironment(fn.Env)
+
+		// TODO: add error if the args mismatch the params length
+		// NOTE: bind/assign the args to parameters in the scope
+		for i, param := range fn.Parameters {
+			funcEnv.Set(param.Value, args[i])
+		}
+
+		result := Eval(fn.Body, funcEnv)
+		return unwrapReturnValue(result)
+	case *object.Builtin:
+		return fn.Fn(args...)
+	default:
 		return newError("object is not a function: %s", obj.Type())
 	}
-
-	// NOTE: create function scope
-	funcEnv := object.NewEnvironment(function.Env)
-
-	// TODO: add error if the args mismatch the params length
-	// NOTE: bind/assign the args to parameters in the scope
-	for i, param := range function.Parameters {
-		funcEnv.Set(param.Value, args[i])
-	}
-
-	result := Eval(function.Body, funcEnv)
-	return unwrapReturnValue(result)
 }
 
 func unwrapReturnValue(obj object.Object) object.Object {
