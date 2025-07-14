@@ -1,6 +1,7 @@
 package eval
 
 import (
+	"fmt"
 	"supersolik/monkey/object"
 )
 
@@ -101,6 +102,16 @@ var builtins = map[string]*object.Builtin{
 				newElements[length+i] = args[i+1]
 			}
 			return &object.Array{Elements: newElements}
+		},
+	},
+	"puts": {
+		Fn: func(args ...object.Object) object.Object {
+			for _, arg := range args {
+				fmt.Println(arg.Inspect())
+			}
+
+			return NULL
+
 		},
 	},
 }
