@@ -1,5 +1,7 @@
 # compiler-book
 
-doing the https://interpreterbook.com/
+Repo for following the excellent Go books by [Thorsten Ball](https://thorstenball.com/)
 
-https://compilerbook.com in plans
+- [x] do the https://interpreterbook.com/
+- [ ] do the lost chapter https://interpreterbook.com/lost
+- [ ] do the https://compilerbook.com
